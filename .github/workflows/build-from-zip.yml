@@ -16,8 +16,12 @@ jobs:
         run: |
           mkdir -p build-src
           unzip -q LoveCompat-Android-v1.0-CLOUD.zip -d build-src
-          echo "Project files:"
-          find build-src/compatibility_app -maxdepth 2 -type f | sort
+
+      - name: Set up AndroidX
+        working-directory: build-src/compatibility_app
+        run: |
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
 
       - name: Set up Java
         uses: actions/setup-java@v4
