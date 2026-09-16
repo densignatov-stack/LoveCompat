@@ -34,12 +34,11 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Fix Java and Kotlin JVM targets
+      - name: Fix JVM targets
         working-directory: build-src/compatibility_app
         run: |
           cat >> app/build.gradle.kts <<'EOF'
 
-          // CI compatibility: use the same JVM target for Java and Kotlin
           android {
               compileOptions {
                   sourceCompatibility = JavaVersion.VERSION_17
@@ -51,6 +50,21 @@ jobs:
               jvmToolchain(17)
           }
           EOF
+
+      - name: Fix MainActivity imports
+        working-directory: build-src/compatibility_app
+        run: |
+          FILE="app/src/main/java/com/example/lovecompat/MainActivity.kt"
+
+          sed -i 's/import androidx.compose.material.icons.filled.AddAPhoto/import androidx.compose.material.icons.filled.AddAPhoto/' "$FILE"
+
+          if ! grep -q "import androidx.activity.compose.setContent" "$FILE"; then
+            sed -i '/^package /a import androidx.activity.compose.setContent' "$FILE"
+          fi
+
+          if ! grep -q "import androidx.compose.animation.core.animateFloat" "$FILE"; then
+            sed -i '/^package /a import androidx.compose.animation.core.animateFloat' "$FILE"
+          fi
 
       - name: Build APK
         working-directory: build-src/compatibility_app
