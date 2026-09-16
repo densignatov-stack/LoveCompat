@@ -51,19 +51,33 @@ jobs:
           }
           EOF
 
-      - name: Fix MainActivity imports
+      - name: Fix MainActivity
         working-directory: build-src/compatibility_app
         run: |
           FILE="app/src/main/java/com/example/lovecompat/MainActivity.kt"
 
-          sed -i 's/import androidx.compose.material.icons.filled.AddAPhoto/import androidx.compose.material.icons.filled.AddAPhoto/' "$FILE"
+          # Replace unavailable AddAPhoto icon with standard Add icon
+          sed -i 's/AddAPhoto/Add/g' "$FILE"
 
-          if ! grep -q "import androidx.activity.compose.setContent" "$FILE"; then
+          # Remove old AddAPhoto import if present
+          sed -i '/import androidx.compose.material.icons.filled.AddAPhoto/d' "$FILE"
+
+          # Add correct Add icon import
+          if ! grep -q 'import androidx.compose.material.icons.filled.Add' "$FILE"; then
+            sed -i '/^package /a import androidx.compose.material.icons.filled.Add' "$FILE"
+          fi
+
+          # Add setContent import
+          if ! grep -q 'import androidx.activity.compose.setContent' "$FILE"; then
             sed -i '/^package /a import androidx.activity.compose.setContent' "$FILE"
           fi
 
-          if ! grep -q "import androidx.compose.animation.core.animateFloat" "$FILE"; then
-            sed -i '/^package /a import androidx.compose.animation.core.animateFloat' "$FILE"
+          # Replace incorrect animateFloat usage with animateFloatAsState
+          sed -i 's/animateFloat(/animateFloatAsState(/g' "$FILE"
+
+          # Add correct animation import
+          if ! grep -q 'import androidx.compose.animation.core.animateFloatAsState' "$FILE"; then
+            sed -i '/^package /a import androidx.compose.animation.core.animateFloatAsState' "$FILE"
           fi
 
       - name: Build APK
