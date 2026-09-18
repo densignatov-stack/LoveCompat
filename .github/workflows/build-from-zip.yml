@@ -14,7 +14,7 @@ jobs:
 
       - name: Build
         run: |
-          unzip -q LoveCompat-Android-v1.1-FIXED.zip -d project
+          unzip -q LoveCompat-Android-v1.2.zip -d project
           cd project/compatibility_app
 
           echo "android.useAndroidX=true" >> gradle.properties
